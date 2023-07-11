@@ -3,10 +3,23 @@ import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import "./Login.jsx";
+// firebase
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+const provider = new GoogleAuthProvider();
 
 const Login = () => {
   const [err, setErr] = useState(false);
   const navigate = useNavigate();
+
+  const signInWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      navigate("/");
+    } catch (error) {
+      // Handle sign-in error
+      console.log(error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,8 +50,10 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <input type="email" placeholder="email" />
           <input type="password" placeholder="password" />
-          <button>Sign in</button>
-          <button>Continue with google</button>
+          <button type="submit">Sign in</button>
+          <button type="button" onClick={signInWithGoogle}>
+            Continue with google
+          </button>
           {err && <span>Something went wrong</span>}
         </form>
         <p>

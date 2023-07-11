@@ -5,11 +5,34 @@ import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
+// firebase
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+const provider = new GoogleAuthProvider();
 
 const Register = () => {
   const [err, setErr] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      // Handle successful sign-in
+      const { user } = result;
+      // save user in database
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      });
+      await setDoc(doc(db, "userChats", user.uid), {});
+      navigate("/");
+    } catch (error) {
+      // Handle sign-in error
+      console.log(error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -62,8 +85,14 @@ const Register = () => {
   return (
     <div className="formContainer">
       <div className="reg">
-      <p>
-"Join our vibrant chat community and connect with like-minded individuals from around the world! Register now to unlock the full potential of our chat system, engage in exciting conversations, and forge new friendships. Don't miss out on the opportunity to be part of this dynamic and inclusive community. Sign up today and start your chat journey!"</p>
+        <p>
+          "Join our vibrant chat community and connect with like-minded
+          individuals from around the world! Register now to unlock the full
+          potential of our chat system, engage in exciting conversations, and
+          forge new friendships. Don't miss out on the opportunity to be part of
+          this dynamic and inclusive community. Sign up today and start your
+          chat journey!"
+        </p>
       </div>
       <div className="formWrapper">
         <span className="logo">Chat-Nexus</span>
@@ -78,6 +107,9 @@ const Register = () => {
             <span>Add an avatar</span>
           </label>
           <button disabled={loading}>Sign up</button>
+          <button type="button" onClick={signInWithGoogle}>
+            Continue with google
+          </button>
           {loading && "Uploading and compressing the image please wait..."}
           {err && <span>Something went wrong</span>}
         </form>
