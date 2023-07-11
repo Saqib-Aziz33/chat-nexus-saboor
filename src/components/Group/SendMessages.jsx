@@ -1,6 +1,7 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { auth, db } from "../../firebase";
+var Crypto = require("crypto-js");
 
 const SendMessages = ({ scroll }) => {
   const [input, setInput] = useState("");
@@ -13,7 +14,11 @@ const SendMessages = ({ scroll }) => {
     }
     const { uid, displayName } = auth.currentUser;
     await addDoc(collection(db, "messages"), {
-      text: input,
+      // encrypt the message
+      text: Crypto.AES.encrypt(
+        input,
+        process.env.REACT_APP_ENC_SECERET
+      ).toString(),
       name: displayName,
       uid,
       timestamp: serverTimestamp(),

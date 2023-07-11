@@ -1,5 +1,6 @@
 import React from "react";
 import { auth } from "../../firebase";
+import Crypto from "crypto-js";
 
 const style = {
   message: `flex items-center shadow-xl m-4 py-2 px-3 rounded-tl-full rounded-tr-full`,
@@ -18,7 +19,12 @@ const Message = ({ message }) => {
     <div>
       <div className={`${style.message} ${messageClass}`}>
         <p className={style.name}>{message.name}</p>
-        <p>{message.text}</p>
+        <p>
+          {Crypto.AES.decrypt(
+            message.text,
+            process.env.REACT_APP_ENC_SECERET
+          ).toString(Crypto.enc.Utf8)}
+        </p>
       </div>
     </div>
   );
