@@ -3,7 +3,14 @@ import Add from "../img/addAvatar.png";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 // firebase
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -43,6 +50,19 @@ const Register = () => {
     const file = e.target[3].files[0];
 
     try {
+      // Check if the username is already taken
+      const usernameQuery = query(
+        collection(db, "users"),
+        where("displayName", "==", e.target[0].value)
+      );
+      const usernameSnapshot = await getDocs(usernameQuery);
+
+      if (!usernameSnapshot.empty) {
+        alert("Username already exists. Please choose a different username.");
+        setLoading(false);
+        return;
+      }
+
       //Create user
       const res = await createUserWithEmailAndPassword(auth, email, password);
 
